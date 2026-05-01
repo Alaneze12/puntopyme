@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { card, button } from "../components/ui";
+import { card } from "../components/ui";
 import { obtenerEmpresa } from "../lib/empresa";
 import { dinero } from "../lib/format";
 import Ticket from "../components/Ticket";
 import { imprimir } from "../lib/print";
+import Button from "../components/Button";
 
 export default function Ventas() {
   const [productos, setProductos] = useState([]);
@@ -94,29 +95,23 @@ export default function Ventas() {
           throw new Error(`Stock insuficiente para ${p.nombre}`);
         }
 
-        const { error: errDetalle } = await supabase
-          .from("ventas_detalle")
-          .insert([
-            {
-              venta_id: venta.id,
-              producto_id: p.id,
-              cantidad: p.cantidad,
-              precio: p.precio,
-              empresa_id: empresaId,
-            },
-          ]);
-
-        if (errDetalle) throw errDetalle;
+        await supabase.from("ventas_detalle").insert([
+          {
+            venta_id: venta.id,
+            producto_id: p.id,
+            cantidad: p.cantidad,
+            precio: p.precio,
+            empresa_id: empresaId,
+          },
+        ]);
 
         const nuevoStock = Number(p.stock) - p.cantidad;
 
-        const { error: errStock } = await supabase
+        await supabase
           .from("productos")
           .update({ stock: nuevoStock })
           .eq("id", p.id)
           .eq("empresa_id", empresaId);
-
-        if (errStock) throw errStock;
       }
 
       setUltimaVenta(venta);
@@ -147,16 +142,32 @@ export default function Ventas() {
     <div>
       <h1>Ventas</h1>
 
+      {/* PRODUCTOS */}
       <div style={card}>
         {productos.map((p) => (
-          <button key={p.id} onClick={() => agregar(p)}>
-            {p.nombre} ({dinero(p.precio)}) - Stock: {p.stock}
-          </button>
+          <div
+            key={p.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: 10,
+              alignItems: "center",
+            }}
+          >
+            <span>
+              {p.nombre} ({dinero(p.precio)}) - Stock: {p.stock}
+            </span>
+
+            <Button onClick={() => agregar(p)}>
+              Agregar
+            </Button>
+          </div>
         ))}
       </div>
 
       <br />
 
+      {/* CARRITO */}
       <div style={card}>
         <h3>Carrito</h3>
 
@@ -172,26 +183,33 @@ export default function Ventas() {
             }}
           >
             <span>{p.nombre}</span>
-            <button onClick={() => quitar(i)}>Quitar</button>
+
+            <Button
+              variant="danger"
+              onClick={() => quitar(i)}
+            >
+              Quitar
+            </Button>
           </div>
         ))}
 
         <h2>Total: {dinero(total)}</h2>
 
-        <button style={button} onClick={vender} disabled={loading}>
+        <Button onClick={vender} disabled={loading}>
           {loading ? "Procesando..." : "Confirmar Venta"}
-        </button>
+        </Button>
       </div>
 
+      {/* TICKET */}
       {ultimaVenta && (
         <div style={{ marginTop: 20 }}>
           <h3>Ticket</h3>
 
           <Ticket venta={ultimaVenta} detalles={detallesVenta} />
 
-          <button style={button} onClick={imprimir}>
+          <Button variant="secondary" onClick={imprimir}>
             Imprimir Ticket
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { card, input, button } from "../components/ui";
+import { card, input } from "../components/ui";
 import { obtenerEmpresa } from "../lib/empresa";
 import { dinero } from "../lib/format";
+import Button from "../components/Button";
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
@@ -127,16 +128,17 @@ export default function Productos() {
     <div>
       <h1>Productos</h1>
 
+      {/* FORMULARIO */}
       <div style={card}>
         <input
-          style={input}
+          style={{ ...input, marginBottom: 10 }}
           placeholder="Nombre"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
         />
 
         <input
-          style={input}
+          style={{ ...input, marginBottom: 10 }}
           placeholder="Precio"
           type="number"
           value={precio}
@@ -144,30 +146,29 @@ export default function Productos() {
         />
 
         <input
-          style={input}
+          style={{ ...input, marginBottom: 15 }}
           placeholder="Stock"
           type="number"
           value={stock}
           onChange={(e) => setStock(e.target.value)}
         />
 
-        <button style={button} onClick={agregar} disabled={loading}>
-          {loading ? "Guardando..." : "Agregar"}
-        </button>
+        <Button onClick={agregar} disabled={loading}>
+          {loading ? "Guardando..." : "Agregar Producto"}
+        </Button>
       </div>
 
       <br />
 
+      {/* BUSCADOR */}
       <input
-        style={input}
+        style={{ ...input, marginBottom: 15 }}
         placeholder="Buscar producto..."
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
       />
 
-      <br />
-      <br />
-
+      {/* LISTA */}
       <div style={card}>
         {filtrados.map((p) => (
           <div
@@ -175,17 +176,24 @@ export default function Productos() {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: 10,
+              alignItems: "center",
+              marginBottom: 12,
+              paddingBottom: 8,
+              borderBottom: "1px solid #eee",
             }}
           >
             <span>
               {p.nombre} - {dinero(p.precio)} - Stock: {p.stock}
             </span>
 
-            <div>
-              <button onClick={() => editarStock(p, 1)}>+</button>
-              <button onClick={() => editarStock(p, -1)}>-</button>
-              <button onClick={() => eliminar(p.id)}>Eliminar</button>
+            <div style={{ display: "flex", gap: 6 }}>
+              <Button onClick={() => editarStock(p, 1)}>+</Button>
+              <Button variant="secondary" onClick={() => editarStock(p, -1)}>
+                -
+              </Button>
+              <Button variant="danger" onClick={() => eliminar(p.id)}>
+                Eliminar
+              </Button>
             </div>
           </div>
         ))}

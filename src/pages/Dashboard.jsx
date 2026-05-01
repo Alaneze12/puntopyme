@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { obtenerEmpresa } from "../lib/empresa";
+import { card } from "../components/ui";
+import { dinero } from "../lib/format";
 
 export default function Dashboard() {
   const [empresaId, setEmpresaId] = useState(null);
@@ -17,7 +19,7 @@ export default function Dashboard() {
   const init = async () => {
     const emp = await obtenerEmpresa();
     setEmpresaId(emp);
-    await cargar(emp);
+    if (emp) await cargar(emp);
   };
 
   const hoyRango = () => {
@@ -33,7 +35,6 @@ export default function Dashboard() {
   const cargar = async (empId) => {
     const { inicio, fin } = hoyRango();
 
-    // 🔥 VENTAS DEL DÍA
     const { data: ventas } = await supabase
       .from("ventas")
       .select("*")
@@ -44,14 +45,12 @@ export default function Dashboard() {
     const totalVentas = ventas?.length || 0;
     setVentasHoy(totalVentas);
 
-    // 🔥 INGRESOS
-    const total = ventas?.reduce((acc, v) => acc + Number(v.total || 0), 0) || 0;
+    const total =
+      ventas?.reduce((acc, v) => acc + Number(v.total || 0), 0) || 0;
     setIngresosHoy(total);
 
-    // 🔥 TICKET PROMEDIO
     setTicketPromedio(totalVentas > 0 ? total / totalVentas : 0);
 
-    // 🔥 TOP PRODUCTOS
     const { data: detalles } = await supabase
       .from("ventas_detalle")
       .select("producto_id, cantidad, productos(nombre)")
@@ -59,7 +58,7 @@ export default function Dashboard() {
 
     const resumen = {};
 
-    detalles?.forEach(d => {
+    detalles?.forEach((d) => {
       const nombre = d.productos?.nombre || "Sin nombre";
 
       if (!resumen[nombre]) {
@@ -76,26 +75,47 @@ export default function Dashboard() {
     setTopProductos(top);
   };
 
+  if (empresaId === null) return <p>Cargando...</p>;
+
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <h1>Dashboard</h1>
 
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-        <Card titulo="Ventas Hoy" valor={ventasHoy} />
-        <Card titulo="Ingresos Hoy" valor={`$${ingresosHoy}`} />
-        <Card titulo="Ticket Promedio" valor={`$${ticketPromedio.toFixed(2)}`} />
+      {/* KPIs */}
+      <div
+        style={{
+          display: "flex",
+          gap: 20,
+          flexWrap: "wrap",
+          marginBottom: 20,
+        }}
+      >
+        <Stat titulo="Ventas Hoy" valor={ventasHoy} />
+        <Stat titulo="Ingresos Hoy" valor={dinero(ingresosHoy)} />
+        <Stat
+          titulo="Ticket Promedio"
+          valor={dinero(ticketPromedio)}
+        />
       </div>
 
-      <br />
-
-      <div style={{ background: "#fff", padding: 20, borderRadius: 10 }}>
-        <h3>Productos más vendidos</h3>
+      {/* TOP PRODUCTOS */}
+      <div style={card}>
+        <h3 style={{ marginBottom: 15 }}>🔥 Más vendidos</h3>
 
         {topProductos.length === 0 && <p>No hay datos</p>}
 
         {topProductos.map((p, i) => (
-          <div key={i} style={{ marginBottom: 8 }}>
-            {p[0]} - {p[1]} vendidos
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #eee",
+            }}
+          >
+            <span>{p[0]}</span>
+            <strong>{p[1]}</strong>
           </div>
         ))}
       </div>
@@ -103,19 +123,25 @@ export default function Dashboard() {
   );
 }
 
-function Card({ titulo, valor }) {
+/* COMPONENTE PRO */
+function Stat({ titulo, valor }) {
   return (
     <div
       style={{
         background: "#fff",
         padding: 20,
-        borderRadius: 12,
-        minWidth: 180,
-        boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
+        borderRadius: 14,
+        minWidth: 200,
+        flex: 1,
+        boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+        border: "1px solid #eee",
       }}
     >
-      <h4>{titulo}</h4>
-      <h2>{valor}</h2>
+      <p style={{ margin: 0, opacity: 0.6, fontSize: 13 }}>
+        {titulo}
+      </p>
+
+      <h2 style={{ margin: "8px 0 0 0" }}>{valor}</h2>
     </div>
   );
 }

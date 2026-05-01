@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { input, button } from "../components/ui";
+import { input, card } from "../components/ui";
 import { obtenerEmpresa } from "../lib/empresa";
 import { dinero } from "../lib/format";
+import Button from "../components/Button";
 
 export default function Compras() {
   const [productos, setProductos] = useState([]);
@@ -65,29 +66,23 @@ export default function Compras() {
 
       if (error) throw error;
 
-      const { error: errDetalle } = await supabase
-        .from("compras_detalle")
-        .insert([
-          {
-            compra_id: compra.id,
-            producto_id: p.id,
-            cantidad: cant,
-            precio: p.precio,
-            empresa_id: empresaId,
-          },
-        ]);
-
-      if (errDetalle) throw errDetalle;
+      await supabase.from("compras_detalle").insert([
+        {
+          compra_id: compra.id,
+          producto_id: p.id,
+          cantidad: cant,
+          precio: p.precio,
+          empresa_id: empresaId,
+        },
+      ]);
 
       const nuevoStock = Number(p.stock) + cant;
 
-      const { error: errStock } = await supabase
+      await supabase
         .from("productos")
         .update({ stock: nuevoStock })
         .eq("id", p.id)
         .eq("empresa_id", empresaId);
-
-      if (errStock) throw errStock;
 
       setProductos((prev) =>
         prev.map((prod) =>
@@ -113,31 +108,40 @@ export default function Compras() {
     <div>
       <h1>Compras</h1>
 
-      <select onChange={(e) => setId(e.target.value)} value={id}>
-        <option value="">Elegir producto</option>
-        {productos.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.nombre} ({dinero(p.precio)}) - Stock: {p.stock}
-          </option>
-        ))}
-      </select>
+      <div style={card}>
+        {/* SELECT */}
+        <select
+          style={{
+            ...input,
+            marginBottom: 15
+          }}
+          onChange={(e) => setId(e.target.value)}
+          value={id}
+        >
+          <option value="">Elegir producto</option>
+          {productos.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.nombre} ({dinero(p.precio)}) - Stock: {p.stock}
+            </option>
+          ))}
+        </select>
 
-      <br />
-      <br />
+        {/* CANTIDAD */}
+        <input
+          style={{
+            ...input,
+            marginBottom: 15
+          }}
+          type="number"
+          value={cantidad}
+          onChange={(e) => setCantidad(e.target.value)}
+        />
 
-      <input
-        style={input}
-        type="number"
-        value={cantidad}
-        onChange={(e) => setCantidad(e.target.value)}
-      />
-
-      <br />
-      <br />
-
-      <button style={button} onClick={comprar} disabled={loading}>
-        {loading ? "Procesando..." : "Agregar Stock"}
-      </button>
+        {/* BOTON PRO */}
+        <Button onClick={comprar} disabled={loading}>
+          {loading ? "Procesando..." : "Agregar Stock"}
+        </Button>
+      </div>
     </div>
   );
 }
