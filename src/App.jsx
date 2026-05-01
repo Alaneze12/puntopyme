@@ -10,6 +10,9 @@ import Productos from "./pages/Productos";
 import Ventas from "./pages/Ventas";
 import Compras from "./pages/Compras";
 import Clientes from "./pages/Clientes";
+import HistorialVentas from "./pages/HistorialVentas";
+import HistorialCompras from "./pages/HistorialCompras";
+import Stock from "./pages/Stock";
 
 // layout
 import Layout from "./components/Layout";
@@ -35,10 +38,17 @@ export default function App() {
 
   if (loading) return <p>Cargando...</p>;
 
-  // 🔒 componente protector
+  // 🔒 PROTECTOR
   const PrivateRoute = ({ children }) => {
     return user ? children : <Navigate to="/" />;
   };
+
+  // 🔥 ENVOLVER TODO CON LAYOUT (evita repetir código)
+  const AppLayout = ({ children }) => (
+    <PrivateRoute>
+      <Layout>{children}</Layout>
+    </PrivateRoute>
+  );
 
   return (
     <BrowserRouter>
@@ -56,60 +66,22 @@ export default function App() {
         />
 
         {/* 🔒 PRIVADAS */}
-        <Route
-          path="/app"
-          element={
-            <PrivateRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
+        <Route path="/app" element={<AppLayout><Dashboard /></AppLayout>} />
 
-        <Route
-          path="/productos"
-          element={
-            <PrivateRoute>
-              <Layout>
-                <Productos />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
+        <Route path="/productos" element={<AppLayout><Productos /></AppLayout>} />
 
-        <Route
-          path="/ventas"
-          element={
-            <PrivateRoute>
-              <Layout>
-                <Ventas />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
+        <Route path="/ventas" element={<AppLayout><Ventas /></AppLayout>} />
 
-        <Route
-          path="/compras"
-          element={
-            <PrivateRoute>
-              <Layout>
-                <Compras />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
+        <Route path="/compras" element={<AppLayout><Compras /></AppLayout>} />
 
-        <Route
-          path="/clientes"
-          element={
-            <PrivateRoute>
-              <Layout>
-                <Clientes />
-              </Layout>
-            </PrivateRoute>
-          }
-        />
+        <Route path="/clientes" element={<AppLayout><Clientes /></AppLayout>} />
+
+        {/* 🔥 NUEVAS */}
+        <Route path="/historial" element={<AppLayout><HistorialVentas /></AppLayout>} />
+
+        <Route path="/historial-compras" element={<AppLayout><HistorialCompras /></AppLayout>} />
+
+        <Route path="/stock" element={<AppLayout><Stock /></AppLayout>} />
 
         {/* fallback */}
         <Route path="*" element={<Navigate to="/" />} />

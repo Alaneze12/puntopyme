@@ -35,14 +35,92 @@ export default function Sidebar() {
       <div>
         <h2 style={logo}>PuntoPyme</h2>
 
+        {/* Avatar empresa */}
+        <div style={avatar}>
+          {empresa.charAt(0).toUpperCase()}
+        </div>
+
         <p style={empresaStyle}>{empresa}</p>
 
         <nav style={nav}>
-          <Link to="/app" style={active("/app")}>Dashboard</Link>
-          <Link to="/productos" style={active("/productos")}>Productos</Link>
-          <Link to="/ventas" style={active("/ventas")}>Ventas</Link>
-          <Link to="/compras" style={active("/compras")}>Compras</Link>
-          <Link to="/clientes" style={active("/clientes")}>Clientes</Link>
+          {/* DASHBOARD */}
+          <Link
+            to="/app"
+            style={active("/app")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            📊 Dashboard
+          </Link>
+
+          {/* GESTIÓN */}
+          <p style={section}>GESTIÓN</p>
+
+          <Link
+            to="/productos"
+            style={active("/productos")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            📦 Productos
+          </Link>
+
+          <Link
+            to="/stock"
+            style={active("/stock")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            📊 Stock
+          </Link>
+
+          <Link
+            to="/clientes"
+            style={active("/clientes")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            👤 Clientes
+          </Link>
+
+          {/* MOVIMIENTOS */}
+          <p style={section}>MOVIMIENTOS</p>
+
+          <Link
+            to="/ventas"
+            style={active("/ventas")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            💰 Ventas
+          </Link>
+
+          <Link
+            to="/compras"
+            style={active("/compras")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            🛒 Compras
+          </Link>
+
+          <Link
+            to="/historial"
+            style={active("/historial")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            📜 Historial Ventas
+          </Link>
+
+          <Link
+            to="/historial-compras"
+            style={active("/historial-compras")}
+            onMouseEnter={hoverIn}
+            onMouseLeave={hoverOut}
+          >
+            📑 Historial Compras
+          </Link>
         </nav>
       </div>
 
@@ -57,6 +135,16 @@ export default function Sidebar() {
     </div>
   );
 }
+
+/* FUNCIONES HOVER */
+
+const hoverIn = (e) => {
+  e.target.style.opacity = 0.8;
+};
+
+const hoverOut = (e) => {
+  e.target.style.opacity = 1;
+};
 
 /* ESTILOS */
 
@@ -73,8 +161,20 @@ const container = {
 };
 
 const logo = {
-  marginBottom: 5,
+  marginBottom: 10,
   fontWeight: 700,
+};
+
+const avatar = {
+  width: 40,
+  height: 40,
+  borderRadius: "50%",
+  background: "linear-gradient(135deg, #5f66ff, #7c83ff)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 8,
+  fontWeight: "bold",
 };
 
 const empresaStyle = {
@@ -86,7 +186,14 @@ const empresaStyle = {
 const nav = {
   display: "flex",
   flexDirection: "column",
-  gap: 10,
+  gap: 8,
+};
+
+const section = {
+  fontSize: 11,
+  opacity: 0.5,
+  marginTop: 12,
+  marginBottom: 4,
 };
 
 const link = {
